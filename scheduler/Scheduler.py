@@ -29,7 +29,7 @@ class Scheduler(multiprocessing.Process):
                 print(self._name + " 待抓取的队列有" + str(preQueue.qsize()) + "条数据")
                 time.sleep(60)
                 if len(objs) <=1:
-                    time.sleep(5)
+                    time.sleep(60)
                 offset +=num
             except Queue.Full as e:
                 print(self._name +" 待抓取队列满了  ")

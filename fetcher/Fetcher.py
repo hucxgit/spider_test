@@ -27,7 +27,6 @@ class Fetcher(multiprocessing.Process):
                 else:
                     print("网络获取返回结果为空")
                     pass
-                time.sleep(3)
             except Queue.Full as e:
                 print(self._name + "  抓取结果对列满了 ")
                 print(e)

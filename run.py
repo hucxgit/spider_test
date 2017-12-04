@@ -8,7 +8,7 @@ def main():
     #开启调度器
     Scheduler.runScheduler()
     #开启抓取器
-    Fetcher.runFetcher(processNum=1)
+    Fetcher.runFetcher(processNum=6)
     #开启处理器
     Processor.runProcessor()
     # print(u"cpu 个数:" + str(multiprocessing.cpu_count()))

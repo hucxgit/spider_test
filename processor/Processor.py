@@ -30,7 +30,7 @@ class Processor(multiprocessing.Process):
                     time.sleep(3)
                     pass
                 else:
-                    time.sleep(10)
+                    time.sleep(3)
             except Queue.Empty as e:
                 print(self._name +" 去取抓取结果 准备更新 抓取结果对列空了")
                 time.sleep(0.5)
