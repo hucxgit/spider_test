@@ -34,6 +34,9 @@ class Scheduler(multiprocessing.Process):
             except Queue.Full as e:
                 print(self._name +" 待抓取队列满了  ")
                 print(e)
+            except Exception as e:
+                print(self._name + " 从mysql读列表数据异常  ")
+                print(e)
             finally:
                 pass
 
