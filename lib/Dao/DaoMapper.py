@@ -15,7 +15,7 @@ class DaoMapper(object):
     """docstring for DaoMapper"""
     def __init__(self,db=None):
         super(DaoMapper, self).__init__()
-        util = Utils(env="DEV")
+        util = Utils(env="PROD")
         # 初始化数据库连接:
         db = util.db if db is None else db
         url = 'mysql+mysqlconnector://'+util.root+':'+util.password+'@'+util.host+'/'+db+"?charset=utf8"
