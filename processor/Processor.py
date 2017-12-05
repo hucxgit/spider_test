@@ -19,8 +19,8 @@ class Processor(multiprocessing.Process):
         preToUpdate = self._args[1]
         while True:
             try:
-                if downQueue.qsize()>=20:
-                    for i in range(20):
+                if downQueue.qsize()>=100:
+                    for i in range(100):
                         orderDic = downQueue.get(block=False)
                         preToUpdate.append(orderDic)
 

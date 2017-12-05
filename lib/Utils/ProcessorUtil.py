@@ -6,7 +6,7 @@ spiderdao = DaoMapper()
 class ProcessorUtil:
     @staticmethod
     def findUnUpdatedList(defaultId,offset,num):
-        queryUrl = "SELECT externalEstateId,latitude,longitude FROM external_estate_temp_gaode t where t.isUpdated = 0 and t.typecode='120302' ORDER BY citycode asc limit "+ str(offset)+","+str(num)
+        queryUrl = "SELECT externalEstateId,latitude,longitude FROM external_estate_temp_gaode t where t.isUpdated = 0 ORDER BY citycode asc limit "+ str(offset)+","+str(num)
         print(queryUrl)
         result = spiderdao.operationSql(sql=queryUrl)
         print(result)
