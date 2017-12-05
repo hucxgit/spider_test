@@ -57,6 +57,8 @@ class ProcessorUtil:
         for orderDic in orderDics:
             tmp = "("
             for key,value in orderDic.items():
+                if key == "memo":
+                    value = value.replace("\'","")
                 if type(value) == types.StringType or type(value) == types.UnicodeType:
                     tmp +=  ("'" + value + "',")
                 else:
