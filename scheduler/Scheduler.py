@@ -41,7 +41,7 @@ class Scheduler(multiprocessing.Process):
                 pass
 
 def runScheduler():
-    scheduler = Scheduler(name="scheduler", args=(SafeQueue.preCrawlQueue,0,100))
+    scheduler = Scheduler(name="scheduler", args=(SafeQueue.preCrawlQueue,0,600))
     #scheduler.start()
 
     #加入池子
