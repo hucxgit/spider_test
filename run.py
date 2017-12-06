@@ -21,7 +21,7 @@ def main():
     for p in SafeQueue.processList:
         p.join()
 
-
+#dev
 if __name__ == '__main__':
     main()
 
