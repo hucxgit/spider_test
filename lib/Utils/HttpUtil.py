@@ -2,6 +2,10 @@
 # -*- encoding: utf-8 -*-
 #根据url请求
 import requests,collections,time,types
+from lxml import etree
+from lib.Utils.ProcessorUtil import ProcessorUtil
+from lib.Utils.CommonUtil import CommonUtil
+import re
 def getProxyIp():
     url = 'http://58.215.140.201:5000/'
     proxy = requests.get(url, auth=('wkzf.com', '123456')).text
@@ -27,7 +31,7 @@ def composePreData(responseJspon):
 
     # 开盘时间
     # opening_data = residentialDic.get('opening_data','')
-    # logger.info("opening_data=" + opening_data)
+    # print("opening_data=" + opening_data)
 
     residentialDic = dataDic.get('residential', {})
 
@@ -110,11 +114,8 @@ def requestWithUrl(url):
         'X-Requested-With': 'XMLHttpRequest'
     }
     request = requests.get(url, proxies=getProxyIp(), timeout=5,headers=headers)
-    #request = requests.get(url,  timeout=5)
     responseJspon = request.json()
     return responseJspon
-
-
 
 def httpRequest(poiId):
     url = "http://ditu.amap.com/detail/get/detail?id=" + poiId
@@ -141,7 +142,212 @@ def httpRequest(poiId):
         print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())) + u"处理超时间 等待2秒重新发送请求")
         print(e)
         #time.sleep(1)
-        httpRequest(poiId)
+        return httpRequest(poiId)
         pass
 
     pass
+
+def requestAnjueke(url):
+    headers = {
+        ':authority': 'shanghai.anjuke.com',
+        ':method': 'GET',
+        ':path': '/community/view/1670?from=Filter_1&hfilter=filterlist',
+        'scheme': 'https',
+        'Referer': 'https://shanghai.anjuke.com',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Encoding': 'zh-CN,zh;q=0.9',
+        'Accept-Language': 'zh-CN,zh;q=0.9',
+        'Connection': 'keep-alive',
+        'Cache-Control': 'max-age=0',
+        'Upgrade-Insecure-Requests': '1',
+        'X-Requested-With': 'XMLHttpRequest',
+        'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'
+
+    }
+    request = requests.get(url, proxies=getProxyIp(), timeout=5,headers=headers)
+    #request = requests.get(url, timeout=5)
+    return request
+#调用安居客
+def httpRequestAnjuke(cityId,externalEstateId):
+    pageUrl = "https://" + cityId + ".anjuke.com/community/view/" + externalEstateId + "?from=Filter_1&hfilter=filterlist"
+    print("请求的url地址:"+pageUrl)
+    try:
+        responseJspon = requestAnjueke(pageUrl)
+        print(responseJspon.status_code)
+        if responseJspon.status_code == 404:
+            print("未找到资源")
+            return
+        content = responseJspon.text
+        return  composeDataWithAnjuke(content,externalEstateId,pageUrl)
+    except Exception as e:
+        print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())) + u"处理超时间 等待2秒重新发送请求")
+        print(e)
+        return httpRequestAnjuke(cityId,externalEstateId)
+        pass
+
+#组装安居客的信息
+def composeDataWithAnjuke(content,estateId,pageUrl):
+    try:
+        if type(content).__name__ != "unicode":
+            content=content.decode('unicode').encode('utf-8')
+        else:
+            content=content.encode('utf-8')
+        html = etree.HTML(content)
+        # 小区信息
+        # 经纬度
+        LonLatPath = "//*[@class='comm-title']/a/@href"
+        result = ProcessorUtil.parseByXPath(html, LonLatPath)
+        LonLat = result.strip()
+
+        mapX = re.search(r'l2=([0-9]*[.]?[0-9]*)&', LonLat, re.M | re.I)
+        if mapX:
+            estateLon = mapX.group(1)
+        else:
+            estateLon = ''
+        #print("estateLon=" + str(estateLon))
+
+        mapY = re.search(r'l1=([0-9]*[.]?[0-9]*)&', LonLat, re.M | re.I)
+        if mapY:
+            estateLat = mapY.group(1)
+        else:
+            estateLat = ''
+        #print("estateLat=" + str(estateLat))
+
+        average = re.search(r'comm_midprice":"([0-9]*)",', content, re.M | re.I)
+        if average:
+            average = average.group(1)
+        else:
+            average = ''
+        #print("average=" + average)
+
+        ###
+        # 生成键值对 信息
+        eseateBaseInfoKeyPath = "//*[@class='basic-parms-mod']/dt"
+        eseateBaseInfoKey = html.xpath(eseateBaseInfoKeyPath)
+        #print(len(eseateBaseInfoKey))
+        estateBaseInfoValuePath = "//*[@class='basic-parms-mod']/dd"
+        estateBaseInfoValue = html.xpath(estateBaseInfoValuePath)
+        #print(len(estateBaseInfoValue))
+
+        estateBaseInfo = {}
+        if len(eseateBaseInfoKey) == len(estateBaseInfoValue):
+            for i in range(len(eseateBaseInfoKey)):
+                key = eseateBaseInfoKey[i]
+                key = key.xpath('string(.)').strip()
+                value = estateBaseInfoValue[i]
+                value = value.xpath('string(.)').strip()
+                #print(key + "--" + value)
+                estateBaseInfo[key] = value
+        else:
+            #print("key value 信息不匹配 不抓取")
+            return None
+        #print(estateBaseInfo)
+
+        key = u"物业类型："
+        result = estateBaseInfo[key] if estateBaseInfo.has_key(key) else ""
+        propertyTypeStr = result.strip().replace(key, "")
+        #print("propertyTypeStr = %s", propertyTypeStr)
+        if u"公寓" in propertyTypeStr or u"住宅" in propertyTypeStr or u"别墅" in propertyTypeStr:
+            propertyType = 1
+        elif u"商" in propertyTypeStr or u"写字楼" in propertyTypeStr:
+            propertyType = 2
+        else:
+            propertyType = 0
+        #print("propertyType = %s", str(propertyType))
+
+        key = u"物业费："
+        result = estateBaseInfo[key] if estateBaseInfo.has_key(key) else ""
+        propertyCharges = result.strip().replace(key, "")
+        #print("propertyCharges = %s", propertyCharges)
+
+
+
+        key = u"总建面积："
+        result = estateBaseInfo[key] if estateBaseInfo.has_key(key) else ""
+        floorArea = result.strip().replace(key, "").encode('utf-8').replace("m²", "")
+        #print("floorArea = %s", floorArea)
+
+        key = u"总户数："
+        result = estateBaseInfo[key] if estateBaseInfo.has_key(key) else ""
+        totalHouse = result.strip().replace(key, "").encode('utf-8').replace("户", "").replace("套", "")
+        if CommonUtil.isNumber(totalHouse):
+            totalHouse = totalHouse if len(totalHouse) > 0 else 0
+        else:
+            totalHouse = 0
+        #print("totalHouse=" + str(totalHouse))
+
+
+        key = u"建造年代："
+        result = estateBaseInfo[key] if estateBaseInfo.has_key(key) else ""
+        completed = result.strip().replace(key, "").encode('utf-8').replace("年", "")
+        #print("completed = %s", completed)
+
+        key = u"停车位："
+        result = estateBaseInfo[key] if estateBaseInfo.has_key(key) else ""
+        parkingLot = result.strip().replace(key, "").encode('utf-8').replace("个", "")
+        if CommonUtil.isNumber(parkingLot):
+            parkingLot = parkingLot if len(parkingLot) > 0 else 0
+        else:
+            parkingLot = 0
+        #print("parkingLot=" + str(parkingLot))
+
+        key = u"容  积  率："
+        result = estateBaseInfo[key] if estateBaseInfo.has_key(key) else ""
+        volumeRate = result.strip().replace(key, "")
+        #print("volumeRate = %s", volumeRate)
+
+        key = u"绿化率："
+        result = estateBaseInfo[key] if estateBaseInfo.has_key(key) else ""
+        greenRate = result.strip().replace(key, "")
+        #print("greenRate = %s", greenRate)
+
+        key = u"物业公司："
+        result = estateBaseInfo[key] if estateBaseInfo.has_key(key) else ""
+        propertyCompany = result.strip().replace(key, "")
+        #print("propertyCompany = %s", propertyCompany)
+
+        key = u"开  发  商："
+        result = estateBaseInfo[key] if estateBaseInfo.has_key(key) else ""
+        developers = result.strip().replace(key, "")
+        #print("developers = %s", developers)
+
+        # 小区
+        memoPath = "//*[@class='comm-brief-mod j-ext-infos']/p/text()"
+        result = ProcessorUtil.parseByXPath(html, memoPath)
+        memo = result.strip()
+
+
+        orderdic = collections.OrderedDict()
+        orderdic['externalEstateId'] = estateId
+        orderdic['pageUrl'] = pageUrl
+        orderdic['latitude'] = str(estateLat)
+        orderdic['longitude'] =  str(estateLon)
+        orderdic['propertyType'] = propertyType
+        orderdic['propertyCharges'] = propertyCharges
+        orderdic['floorArea'] = floorArea
+        orderdic['totalHouse'] = totalHouse
+        orderdic['parkingLot'] = parkingLot
+        orderdic['volumeRate'] = volumeRate
+        orderdic['greenRate'] = greenRate
+        orderdic['propertyCompany'] = propertyCompany
+        orderdic['developers'] = developers
+        orderdic['memo'] = memo
+        orderdic['isUpdated'] = 1
+
+        #图片数据
+        picList = []
+
+        imgSrcListPath = "//*[@class='con']//img/@src"
+        imgSrcList = html.xpath(imgSrcListPath)
+
+        for i in range(len(imgSrcList)):
+            picOrderDic = collections.OrderedDict()
+            picOrderDic['estateId'] = estateId
+            picOrderDic['externalImgUrl'] = imgSrcList[i] + ""
+            picOrderDic['status'] = 1
+            picList.append(picOrderDic)
+        print("抓取并解析成功")
+        return orderdic,picList
+    except Exception as e:
+        print("抓取并解析异常")
+        return None

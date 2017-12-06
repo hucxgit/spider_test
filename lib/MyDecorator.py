@@ -67,8 +67,8 @@ def FetcherDecorator(name):
 def ProcessorDecorator(name):
     def wrapper(func):
         def sub_wrapper(*args,**kwargs):
-            downQueue = kwargs['downQueue']
-            preToUpdate = kwargs['preToUpdate']
+            #downQueue = kwargs['downQueue']
+            #preToUpdate = kwargs['preToUpdate']
             while True:
                 try:
                     func(*args, **kwargs)

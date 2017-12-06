@@ -33,10 +33,14 @@ def text3(*args,**kwargs):
     print("text1")
 
 if __name__ == '__main__':
-    text3(1,2,3,4,a=1,b=2,c=3)
+    #text3(1,2,3,4,a=1,b=2,c=3)
     # import lib.MyQueue.SafeQueue as SafeQueue
     # for i in range(5):
     #     print(SafeQueue.preCrawlQueue)
     # pass
+
+    from lib.Utils import HttpUtil
+    HttpUtil.httpRequestAnjuke("beijing","1001159")
+
 
 

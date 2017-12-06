@@ -12,7 +12,7 @@ def main(cls):
     #开启调度器
     Scheduler.runScheduler(func=cls.runTask)
     #开启抓取器
-    Fetcher.runFetcher(processNum=2,func=cls.runFetcher)
+    Fetcher.runFetcher(processNum=10,func=cls.runFetcher)
     #开启处理器
     Processor.runProcessor(func=cls.runProcessor)
 
@@ -32,7 +32,8 @@ def cli(ctx,**kwargs):
 @cli.command()
 @click.pass_context
 def anjuke(ctx,**kwargs):
-    main()
+    from bussiness import AnjukeBussiness
+    main(AnjukeBussiness)
     pass
 
 @cli.command()
@@ -44,4 +45,6 @@ def gaode(ctx,**kwargs):
 
 #dev
 if __name__ == '__main__':
-    cli()
+    #cli()
+    from bussiness import AnjukeBussiness
+    main(AnjukeBussiness)
