@@ -39,8 +39,16 @@ if __name__ == '__main__':
     #     print(SafeQueue.preCrawlQueue)
     # pass
 
-    from lib.Utils import HttpUtil
-    HttpUtil.httpRequestAnjuke("beijing","1001159")
+    #from lib.Utils import HttpUtil
+    #HttpUtil.httpRequestAnjuke("beijing","1001159")
+
+    #测试
+    import multiprocessing
+    a = multiprocessing.Queue(maxsize=2)
+    a.put("1")
+    a.put("2")
+    print(a.qsize())
+    print(a.full())
 
 
 

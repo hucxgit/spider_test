@@ -202,9 +202,7 @@ def composeDataWithAnjuke(content,estateId,pageUrl):
         html = etree.HTML(content)
 
         #验证是否到验证码页面
-        vertifyPagePath = "//*[@id='verify_page']"
-
-
+        #vertifyPagePath = "//*[@id='verify_page']"
 
         # 小区信息
         # 经纬度

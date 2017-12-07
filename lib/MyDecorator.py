@@ -12,7 +12,10 @@ def SchedulerDecorator(name):
             num = args[1]
             while True:
                 try:
-                    objs = func(offset,num,**kwargs)
+                    if  preQueue._maxsize - preQueue.qsize < 600:
+                        print(name + " 待抓取的队列有" + str(preQueue.qsize()) + "条数据  队列快满了 要等待30秒")
+                        time.sleep(30)
+                    objs = func(offset, num, **kwargs)
                     print(name + " 发网络请求去抓取数据 获取了" + str(len(objs)) + "条数据")
                     for obj in objs:
                         preQueue.put(obj, block=False)
