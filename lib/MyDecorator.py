@@ -12,7 +12,7 @@ def SchedulerDecorator(name):
             num = args[1]
             while True:
                 try:
-                    objs = func(*args,**kwargs)
+                    objs = func(offset,num,**kwargs)
                     print(name + " 发网络请求去抓取数据 获取了" + str(len(objs)) + "条数据")
                     for obj in objs:
                         preQueue.put(obj, block=False)

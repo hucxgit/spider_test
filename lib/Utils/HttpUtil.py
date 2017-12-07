@@ -5,6 +5,7 @@ import requests,collections,time,types
 from lxml import etree
 from lib.Utils.ProcessorUtil import ProcessorUtil
 from lib.Utils.CommonUtil import CommonUtil
+from lib.Utils.UAUtil import UAUtil
 import re
 def getProxyIp():
     url = 'http://58.215.140.201:5000/'
@@ -161,11 +162,11 @@ def requestAnjueke(url):
         'Cache-Control': 'max-age=0',
         'Upgrade-Insecure-Requests': '1',
         'X-Requested-With': 'XMLHttpRequest',
-        'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'
+        'user-agent': UAUtil.getUA()
 
     }
     request = requests.get(url, proxies=getProxyIp(), timeout=5,headers=headers)
-    #request = requests.get(url, timeout=5)
+    #request = requests.get(url,proxies={"http": "183.152.171.217:8888"},timeout=5)
     return request
 #调用安居客
 def httpRequestAnjuke(cityId,externalEstateId):
@@ -177,7 +178,13 @@ def httpRequestAnjuke(cityId,externalEstateId):
         if responseJspon.status_code == 404:
             print("未找到资源")
             return
+        if responseJspon.status_code == 503:
+            print("503 Service Temporarily Unavailable")
+            return
         content = responseJspon.text
+        if "访问验证-安居客" in content:
+            print("跳转到验证码")
+            return
         return  composeDataWithAnjuke(content,externalEstateId,pageUrl)
     except Exception as e:
         print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())) + u"处理超时间 等待2秒重新发送请求")
@@ -193,6 +200,12 @@ def composeDataWithAnjuke(content,estateId,pageUrl):
         else:
             content=content.encode('utf-8')
         html = etree.HTML(content)
+
+        #验证是否到验证码页面
+        vertifyPagePath = "//*[@id='verify_page']"
+
+
+
         # 小区信息
         # 经纬度
         LonLatPath = "//*[@class='comm-title']/a/@href"

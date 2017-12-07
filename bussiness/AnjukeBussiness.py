@@ -8,7 +8,7 @@ from lib.Utils import HttpUtil
 def getTask(*args,**kwargs):
     offset = args[0]
     num = args[1]
-    objs = ProcessorUtil.findUnUpdatedListAnjuke("B0015042AF", offset, num)
+    objs = ProcessorUtil.findUnUpdatedListAnjuke("84771", offset, num)
     return objs
 
 
@@ -29,8 +29,8 @@ def processor(*args,**kwargs):
     #preToUpdate = kwargs['preToUpdate']
     preEstateData = []
     preEstateImageData = []
-    if downQueue.qsize() >= 5:
-        for i in range(5):
+    if downQueue.qsize() >= 20:
+        for i in range(20):
             obj = downQueue.get(block=False)
             preEstateData.append(obj[0])
             for tmp in obj[1]:
