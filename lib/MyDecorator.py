@@ -12,7 +12,7 @@ def SchedulerDecorator(name):
             num = args[1]
             while True:
                 try:
-                    if  preQueue._maxsize - preQueue.qsize < 600:
+                    if  preQueue._maxsize - preQueue.qsize() < 600:
                         print(name + " 待抓取的队列有" + str(preQueue.qsize()) + "条数据  队列快满了 要等待30秒")
                         time.sleep(30)
                     objs = func(offset, num, **kwargs)
