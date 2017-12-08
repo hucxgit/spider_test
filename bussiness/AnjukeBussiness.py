@@ -17,10 +17,6 @@ def getTask(*args,**kwargs):
 def fetcher(*args,**kwargs):
     preQueue = kwargs['preQueue']
     obj = preQueue.get(block=False)
-
-    import random,time
-    sleepTime = random.randint(5, 10)
-    time.sleep(sleepTime)
     resultObj = HttpUtil.httpRequestAnjuke(obj[0],obj[1])
     return resultObj
 
