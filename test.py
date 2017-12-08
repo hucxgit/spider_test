@@ -43,12 +43,15 @@ if __name__ == '__main__':
     #HttpUtil.httpRequestAnjuke("beijing","1001159")
 
     #测试
-    import multiprocessing
-    a = multiprocessing.Queue(maxsize=2)
-    a.put("1")
-    a.put("2")
-    print(a.qsize())
-    print(a.full())
+    # import multiprocessing
+    # a = multiprocessing.Queue(maxsize=2)
+    # a.put("1")
+    # a.put("2")
+    # print(a.qsize())
+    # print(a.full())
+    import random
+    print(random.randint(12, 20))
+
 
 
 

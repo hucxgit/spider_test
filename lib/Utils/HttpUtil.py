@@ -150,11 +150,11 @@ def httpRequest(poiId):
 
 def requestAnjueke(url):
     headers = {
-        ':authority': 'shanghai.anjuke.com',
-        ':method': 'GET',
-        ':path': '/community/view/1670?from=Filter_1&hfilter=filterlist',
+         ':authority': 'shanghai.anjuke.com',
+         ':method': 'GET',
+         ':path': '/community/view/1670?from=Filter_1&hfilter=filterlist',
         'scheme': 'https',
-        'Referer': 'https://shanghai.anjuke.com',
+        'Referer': 'https://www.anjuke.com',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
         'Accept-Encoding': 'zh-CN,zh;q=0.9',
         'Accept-Language': 'zh-CN,zh;q=0.9',
@@ -162,7 +162,8 @@ def requestAnjueke(url):
         'Cache-Control': 'max-age=0',
         'Upgrade-Insecure-Requests': '1',
         'X-Requested-With': 'XMLHttpRequest',
-        'user-agent': UAUtil.getUA()
+        'cookie':'ajk_bfp=1; sessid=E359E0E8-9ED3-3870-F2CF-83314F685864; lps=http%3A%2F%2Fwww.anjuke.com%2F%7C; ctid=11; als=0; aQQ_ajkguid=E7BA61CF-63B8-9A45-B739-F75F4C7AAE49; twe=2; __xsptplusUT_8=1; _ga=GA1.2.1106761444.1512641236; _gid=GA1.2.2126291036.1512641236; _gat=1; __xsptplus8=8.1.1512641235.1512641662.7%234%7C%7C%7C%7C%7C%23%23LMPuKFynvoLHWvEmFiIYk-VcUwPcwcqP%23; 58tj_uuid=183b4514-d97f-4c1b-8187-6dc876a40b93; new_session=0; init_refer=; new_uv=1',
+        'user-agent': 'Mozilla/5.0 (X11; CrOS i686 1412.186.0) AppleWebKit/535.11 (KHTML like Gecko) Chrome/17.0.963.54 Safari/535.11'
 
     }
     request = requests.get(url, proxies=getProxyIp(), timeout=5,headers=headers)
@@ -184,6 +185,7 @@ def httpRequestAnjuke(cityId,externalEstateId):
         content = responseJspon.text
         if "访问验证-安居客" in content:
             print("跳转到验证码")
+            time.sleep(30)
             return
         return  composeDataWithAnjuke(content,externalEstateId,pageUrl)
     except Exception as e:

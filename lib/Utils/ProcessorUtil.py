@@ -79,7 +79,7 @@ class ProcessorUtil:
     @staticmethod
     def findUnUpdatedListAnjuke(defaultId, offset, num):
         queryUrl = "SELECT externalEstateId,note FROM external_estate_temp_anjuke t" \
-                   " where t.isUpdated = 0 and t.note is not null ORDER BY cityId asc limit " + str(
+                   " where t.isUpdated = 0 and t.note is not null ORDER BY cityId desc limit " + str(
             offset) + "," + str(num)
 
         #queryUrl = "SELECT externalEstateId,note FROM external_estate_temp_anjuke t where t.isUpdated=1 and t.externalEstateId=174414"
