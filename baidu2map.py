@@ -29,11 +29,11 @@ def generate_centerpoints(startdpoint, endpoint, offset=None):
     conn = pymysql.connect(host='58.215.160.6', port=3306, user='spiderroot', password='kJ3CiqnIQtrD', db='spider')
     cur = conn.cursor()
     while startdpoint[1]<=endpoint[1]:
-        startdpoint[1]+=0.5
-        left_bottom_lon = (startdpoint[1]-0.25)
-        left_bottom_lat = float((startdpoint[0]-0.25))
-        right_top_lon = float((startdpoint[1]+0.25))
-        right_top_lag = float((startdpoint[0]+0.25))
+        startdpoint[1]+=0.05
+        left_bottom_lon = (startdpoint[1]-0.025)
+        left_bottom_lat = float((startdpoint[0]-0.025))
+        right_top_lon = float((startdpoint[1]+0.025))
+        right_top_lag = float((startdpoint[0]+0.025))
         # print((left_bottom_lat, left_bottom_lon))
         url = generate_url((left_bottom_lat, left_bottom_lon),(right_top_lag,right_top_lon))
         print(url)
@@ -67,11 +67,11 @@ def generate_centerpoints(startdpoint, endpoint, offset=None):
         # time.sleep(random.randint(1,2))
         while startdpoint[0]<=endpoint[0]:
             time.sleep(random.randint(1, 2))
-            startdpoint[0]+=0.5
-            left_bottom_lon =startdpoint[1]-0.25
-            left_bottom_lat = startdpoint[0]-0.25
-            right_top_lon = startdpoint[1] +0.25
-            right_top_lag = startdpoint[0] + 0.25
+            startdpoint[0]+=0.05
+            left_bottom_lon =startdpoint[1]-0.025
+            left_bottom_lat = startdpoint[0]-0.025
+            right_top_lon = startdpoint[1] +0.025
+            right_top_lag = startdpoint[0] + 0.025
             url = generate_url((left_bottom_lat, left_bottom_lon), (right_top_lag, right_top_lon))
             print(url)
             # time.sleep(random.randint(1,2))
@@ -99,6 +99,7 @@ def generate_centerpoints(startdpoint, endpoint, offset=None):
                 print(e)
                 # err_url.append(url)
                 logging.debug(url)
+
             # print(url)
             print('==================================')
             print(len(err_url))

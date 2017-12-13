@@ -15,6 +15,7 @@ class BaidumaoSpider(object):
         self.requetsqueue = Queue()
         self.dataqueue = Queue()
         self.list = []
+        self.errlist = []
         self.results_list = []
         self.conn = pymysql.connect(host='58.215.160.6', port=3306, user='spiderroot', password='kJ3CiqnIQtrD', db='spider')
         self.cur = self.conn.cursor()
@@ -48,22 +49,39 @@ class BaidumaoSpider(object):
                 self.requetsqueue.put(url)
             startdpoint[0] = 30
             print(len(self.list))
+        return self.list
 
     def post_request(self,url):
         try:
             response = requestWithUrl(url)
             # response = json.loads(response)
+            print('66666666666666666666666666')
             if response:
                 if response["results"]:
                     self.dataqueue.put(response['results'])
                     return response['results']
-                return None
-            self.requetsqueue.put(url)
+                else:
+                    self.list.remove(url)
+                    try:
+                        self.errlist.remove(url)
+                    except Exception as e:
+                        # print e
+                        pass
+                    return None
+            # self.requetsqueue.put(url)
+            # self.errlist.append(url)
+
         except Exception as e:
-            print(e)
+            print('22222222222222222222')
+            print(url)
+            print('888888888888888888888888')
+            # self.errlist.append(url)
+            self.retry(url)
+
 
 
     def save_data(self,results_list):
+        if resultlist:
             for infodict in results_list:
                 name = infodict["name"]
                 uid = infodict["uid"]
@@ -82,6 +100,15 @@ class BaidumaoSpider(object):
                 # print(insertSQL)
                 self.cur.execute(insertSQL)
                 self.conn.commit()
+        # else:
+        #     self.list.remove(url)
+        else:
+            try:
+                self.errlist.remove(url)
+            except Exception as e:
+                print(e)
+
+
 
     def secherdur(self):
         while self.requetsqueue.qsize :
@@ -95,11 +122,21 @@ class BaidumaoSpider(object):
 
     def dataschedular(self):
         while True:
+            pass
             results_list = self.dataqueue.get()
             # self.save_data(self,results_list)
 
 
+    def retry(self,url,i=0):
+        if i >=3:
+            return
+        try:
+            i += 1
+            self.post_request(url)
+            print("00000000000000000000000000k")
 
+        except Exception as e :
+            return self.retry(url,i)
 
 if __name__ == '__main__':
     baidumap = BaidumaoSpider()
@@ -107,13 +144,31 @@ if __name__ == '__main__':
     end = [32, 122]
     po = Pool(3)
     url_list = baidumap.generate_urls(start, end)
+    for url in baidumap.list:
+        print('===========================================')
+        resultlist =  baidumap.post_request(url)
+        print(len(baidumap.errlist))
+        if resultlist:
+            baidumap.save_data(resultlist)
+        # if baidumap.errlist:
+        #     print('+++++++++++++++++++++++++++')
+        #     print(len(baidumap.errlist))
+        #     for errurl in baidumap.errlist:
+        #         resultlist = baidumap.post_request(url)
+        #         if resultlist:
+        #             baidumap.save_data(resultlist)
+
+
+
     # for url in url_list:
-    #     baidumap.post_request(url)
-    #     baidumap.po.apply_async()
+    # while baidumap.requetsqueue:
+    #     url = baidumap.requetsqueue.get()
+        # baidumap.post_request(url)
+        # baidumap.po.apply_async(baidumap.post_request, (url,))
     # results_list = baidumap.dataqueue.get()
-    t1 = threading.Thread(target=baidumap.secherdur)
-    t1.start()
-    t1.join()
+    # t1 = threading.Thread(target=baidumap.secherdur)
+    # t1.start()
+    # t1.join()
     # t2 = threading.Thread(target=baidumap.save_data)
     # t2.start()
     # t2.join()
