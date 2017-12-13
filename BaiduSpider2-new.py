@@ -6,12 +6,13 @@ import pymysql
 import lib.Utils.mapUtils as mapUtils
 
 class BaidumaoSpider(object):
+
     def __init__(self):
         self.requetsqueue = Queue()
         self.dataqueue = Queue()
         self.list = []
         self.urlList=[]
-        self.conn = pymysql.connect(host='58.215.160.6', port=3306, user='spiderroot', password='kJ3CiqnIQtrD', db='spider')
+        self.conn = pymysql.connect(host='58.215.160.6', port=3306, user='spiderroot', password='kJ3CiqnIQtrD', db='spider',use_unicode=True, charset="utf8")
         self.cur = self.conn.cursor()
         self.po = Pool(3)
     def __del__(self):
@@ -110,29 +111,63 @@ class BaidumaoSpider(object):
 
 
     def save_data(self,results_list):
+        import types,collections
         if results_list:
-            for infodict in results_list:
-                name = infodict['name'] if infodict.has_key('name') else ""
-                uid = infodict['uid'] if infodict.has_key('uid') else ""
-                lnglatDic = infodict['location'] if infodict.has_key('location') else {}
-                lat = lnglatDic["lat"] if lnglatDic.has_key("lat") else 0
-                lng = lnglatDic["lng"] if lnglatDic.has_key("lng") else 0
-                address = infodict['address']
-                detailDic =  infodict["detail_info"]
-                type = detailDic['type']
-                tag = detailDic['tag'] if detailDic.has_key('tag') else ""
-                # print(type)
-                # print(tag)
-                # insertSQL = 'insert into external_estate_temp_baidu(externalEstateld,lontitude,latitude,initName)VALUES ({},{},{},{})'.format(uid,lng,lat,address)
-                insertSQL = '''INSERT INTO spider.external_estate_temp_baidu(externalEstateId,estateName,longitude,latitude,initName,note)VALUES('{}','{}','{}','{}','{}','{}') ON DUPLICATE KEY UPDATE `externalEstateId` =VALUES(`externalEstateId`),`estateName`=Values(`estateName`),`longitude` =VALUES(`longitude`),`latitude` =VALUES(`latitude`),`initName`=Values(`initName`),`note`=Values(`note`)'''.format(
-                    uid, name, lng, lat, address,tag)
-                print(uid)
-                # print(insertSQL)
-                try:
-                    self.cur.execute(insertSQL)
-                    self.conn.commit()
-                except Exception as e:
-                    print(e)
+            try:
+                sqlParametersResult = []
+                for infodict in results_list:
+                    name = infodict['name'] if infodict.has_key('name') else ""
+                    uid = infodict['uid'] if infodict.has_key('uid') else ""
+                    lnglatDic = infodict['location'] if infodict.has_key('location') else {}
+                    lat = lnglatDic["lat"] if lnglatDic.has_key("lat") else 0
+                    lng = lnglatDic["lng"] if lnglatDic.has_key("lng") else 0
+                    address = infodict['address']
+                    detailDic = infodict["detail_info"]
+                    baiduType = detailDic['type']
+                    tag = detailDic['tag'] if detailDic.has_key('tag') else ""
+
+                    sqlParameters = collections.OrderedDict()
+                    sqlParameters["externalEstateld"] = uid
+                    sqlParameters["estateName"] = name
+                    sqlParameters["lontitude"] = lng
+                    sqlParameters["latitude"] = lat
+                    sqlParameters["initName"] = address
+                    sqlParameters['baidutype'] = baiduType
+                    sqlParameters["baidutag"] = tag
+                    sqlParametersResult.append(sqlParameters)
+                insertSQL = '''INSERT INTO spider.external_estate_temp_baidu(
+                                                    externalEstateId,estateName,longitude,latitude,initName,baidutype,baidutag) VALUES'''
+
+                updateSql = ''' ON DUPLICATE KEY UPDATE
+                                            `externalEstateId` =VALUES(`externalEstateId`),
+                                            `estateName`=Values(`estateName`),
+                                            `longitude` =VALUES(`longitude`),
+                                            `latitude` =VALUES(`latitude`),
+                                            `initName`=Values(`initName`),
+                                            `baidutype`=Values(`baidutype`),
+                                            `baidutag`=Values(`baidutag`)'''
+
+                params = ""
+                for orderDic in sqlParametersResult:
+                    tmp = "("
+                    for key, value in orderDic.items():
+                        if type(value) == types.StringType or type(value) == types.UnicodeType:
+                            tmp += ("'" + value + "',")
+                        else:
+                            tmp += str(value) + ","
+                            pass
+                    if len(tmp) > 0:
+                        tmp = tmp[:-1]
+                    tmp += "),"
+                    params += tmp
+                if len(params) > 0:
+                    params = params[:-1]
+                insertSQL = insertSQL + params + updateSql
+                self.cur.execute(insertSQL)
+                self.conn.commit()
+            except Exception as e:
+                print("批量插入数据异常")
+                print(e)
         else:
             pass
 
@@ -201,13 +236,13 @@ if __name__ == '__main__':
 
     #放入所有url
     for section in baidumap.list:
-        print(section[1] + section[2])
+        #print(section[1] + section[2])
         url = baidumap.generate_url(section[1], section[2])
         baidumap.urlList.append(url)
 
 
     print("所有的url")
-    print(baidumap.urlList)
+    #print(baidumap.urlList)
     if len(baidumap.urlList) > 0:
         for tmpurl in baidumap.urlList:
             index = baidumap.urlList.index(tmpurl)+1
