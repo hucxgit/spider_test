@@ -131,8 +131,8 @@ class BaidumaoSpider(object):
         if i >=3:
             return
         try:
-            i += 1
             self.post_request(url)
+            i += 1
             print("00000000000000000000000000k")
 
         except Exception as e :
