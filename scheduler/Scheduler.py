@@ -12,8 +12,9 @@ class Scheduler(multiprocessing.Process):
         pass
 
 def runScheduler(func=None):
+    # 其实就是实例化了的一个进程并放进列表里
     preCrawlQueue = SafeQueue.preCrawlQueue
-    scheduler = Scheduler(name="scheduler", args=(preCrawlQueue,0,600),kwargs={'func':func})
+    scheduler = Scheduler(name="scheduler", args=(preCrawlQueue,5000,600),kwargs={'func':func})
     #加入池子
     SafeQueue.processList.append(scheduler)
     pass

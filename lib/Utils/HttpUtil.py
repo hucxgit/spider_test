@@ -150,9 +150,9 @@ def httpRequest(poiId):
 
 def requestAnjueke(url):
     headers = {
-         ':authority': 'shanghai.anjuke.com',
-         ':method': 'GET',
-         ':path': '/community/view/1670?from=Filter_1&hfilter=filterlist',
+         #':authority': 'shanghai.anjuke.com',
+         #':method': 'GET',
+        # ':path': '/community/view/1670?from=Filter_1&hfilter=filterlist',
         'scheme': 'https',
         'Referer': 'https://www.anjuke.com',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',

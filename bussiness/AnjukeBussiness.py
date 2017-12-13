@@ -19,7 +19,7 @@ def fetcher(*args,**kwargs):
     obj = preQueue.get(block=False)
 
     import random,time
-    sleepTime = random.randint(5, 10)
+    sleepTime = random.randint(5,7)
     time.sleep(sleepTime)
     resultObj = HttpUtil.httpRequestAnjuke(obj[0],obj[1])
     return resultObj

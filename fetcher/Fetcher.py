@@ -10,6 +10,7 @@ class Fetcher(multiprocessing.Process):
         pass
 
 def runFetcher(processNum=1,func=None):
+    # 实例化了进程并且放进了列表里
     for i in range(processNum):
         preCrawlQueue = SafeQueue.preCrawlQueue
         donwCrawlQueue = SafeQueue.donwCrawlQueue
