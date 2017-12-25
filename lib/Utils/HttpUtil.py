@@ -9,7 +9,7 @@ from lib.Utils.UAUtil import UAUtil
 import re
 def getProxyIp():
     url = 'http://58.215.140.201:5000/'
-    proxy = requests.get(url, auth=('wkzf.com', '123456')).text
+    proxy = requests.get(url,timeout=3, auth=('wkzf.com', '123456')).text
     print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())) + u"---------------------------------获取的使用代理ip="+proxy)
     proxyDic = {"http":proxy}
     return proxyDic
@@ -110,11 +110,13 @@ def requestWithUrl(url):
         'Accept-Encoding': 'gzip, deflate',
         'Connection': 'keep-alive',
         'Cache-Control': 'max-age=0',
-        'Host': 'ditu.amap.com',
+        'Host': 'api.map.baidu.com',
         'Upgrade-Insecure-Requests': '1',
         'X-Requested-With': 'XMLHttpRequest'
     }
     request = requests.get(url, proxies=getProxyIp(), timeout=5,headers=headers)
+    # request = requests.get(url, timeout=5,headers=headers)
+
     responseJspon = request.json()
     return responseJspon
 

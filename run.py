@@ -5,14 +5,14 @@ from scheduler import Scheduler
 from processor import Processor
 import lib.MyQueue.SafeQueue as SafeQueue
 import click
-
+from multiprocessing import Process, freeze_support
 
 
 def main(cls):
     #开启调度器
     Scheduler.runScheduler(func=cls.runTask)
     #开启抓取器
-    Fetcher.runFetcher(processNum=5,func=cls.runFetcher)
+    Fetcher.runFetcher(processNum=20,func=cls.runFetcher)
     #开启处理器
     Processor.runProcessor(func=cls.runProcessor)
 
@@ -43,8 +43,18 @@ def gaode(ctx,**kwargs):
     main(GaodeBussiness)
     pass
 
+@cli.command()
+@click.pass_context
+def baidu(ctx,**kwargs):
+    from bussiness import BaidumapBussiness
+    main(BaidumapBussiness)
+    pass
+
 #dev
 if __name__ == '__main__':
     #cli()
-    from bussiness import AnjukeBussiness
-    main(AnjukeBussiness)
+    # freeze_support()
+    from bussiness import BaidumapBussiness
+    main(BaidumapBussiness)
+
+
